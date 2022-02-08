@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "latex2wordcloud"
+version = "0.1.0"
+description = ""
+authors = ["Jessica Walkenhorst <walkenho@gmail.com>"]
+
+[tool.black]
+line-length = 100
+
+[tool.poetry.dependencies]
+python = "^3.8"
+voila = "^0.3.0"
+plotly = "^5.5.0"
+ipywidgets = "^7.6.5"
+scikit-learn = "^1.0.2"
+pandas = "^1.3.5"
+nltk = "^3.6.7"
+wordcloud = "^1.8.1"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+black = "^21.12b0"
+isort = "^5.10.1"
+jupyter = "^1.0.0"
+notebook = "^6.4.6"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
