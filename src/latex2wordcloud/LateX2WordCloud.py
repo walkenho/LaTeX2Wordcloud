@@ -1,82 +1,91 @@
-# from latex2wordcloud.LaTeXStripper import strip_text
+from dataclasses import dataclass
 
-from ipywidgets import FileUpload
+from wordcloud import WordCloud
 
 from sklearn.feature_extraction.text import CountVectorizer
-import numpy as np
 import plotly.express as px
 import pandas as pd
 
 from typing import List
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-from nltk.corpus import stopwords
 from nltk import pos_tag
 import re
 import string
 
 from latex2wordcloud.LaTeXStripper import strip_text
 
-universal_tags_to_wordnet = {"NOUN": "n", "VERB": "v", "ADJ": "a", "ADV": "r"}
-wordnet_to_universal_tags = {v: k for k, v in universal_tags_to_wordnet.items()}
+UNIVERSAL_TAGS_TO_WORDNET = {"NOUN": "n", "VERB": "v", "ADJ": "a", "ADV": "r"}
 
-"""Map universal POS tags to WordNet POS tags.
+def convert_universal_to_worknet_tag(tag):
+    """Map universal POS tags to WordNet POS tags.
 
-Wordnet has five tags:
-n - NOUN 
-v - VERB 
-a - ADJECTIVE 
-s - ADJECTIVE SATELLITE 
-r - ADVERB
+    Wordnet has five tags:
+    n - NOUN
+    v - VERB
+    a - ADJECTIVE
+    s - ADJECTIVE SATELLITE
+    r - ADVERB
 
-Ignore the 's' tag.
-"""
+    Ignore the 's' tag.
+    """
+    return UNIVERSAL_TAGS_TO_WORDNET.get(tag, "undefined")
 
+@dataclass
+class Token():
+    text: str
+    tag: str
 
-def lemmatize_universal_tagged_token(tagged_token, lemmatizer=WordNetLemmatizer()):
-    wordnet_tag = universal_tags_to_wordnet.get(tagged_token[1], "undefined")
-    if wordnet_tag == "undefined":
-        return (lemmatizer.lemmatize(tagged_token[0]), wordnet_tag)
-    else:
-        return (lemmatizer.lemmatize(tagged_token[0], wordnet_tag), wordnet_tag)
+    def lower(self):
+        return Token(self.text.lower(), self.tag)
 
+    def translate(self, *args, **kwargs):
+        return Token(self.text.translate(*args, **kwargs), self.tag)
 
-def tokenize_text(text):
-    return pos_tag(word_tokenize(text), tagset="universal")
-
-
-def lemmatize_tokens(tokens):
-    return [lemmatize_universal_tagged_token(token) for token in tokens]
-
-
-def convert_tokens_to_lowercase(tokens):
-    return [(token[0].lower().strip(), token[1]) for token in tokens]
-
-
-def filter_stopwords(tokens, stopwords):
-    return [token for token in tokens if token[0] not in stopwords]
+    def lemmatize(self, lemmatizer=WordNetLemmatizer()):
+        wordnet_tag = convert_universal_to_worknet_tag(self.tag)
+        if wordnet_tag == "undefined":
+            return Token(lemmatizer.lemmatize(self.text), self.tag)
+        else:
+            return Token(lemmatizer.lemmatize(self.text, wordnet_tag), self.tag)
 
 
-def keep_only_specified_tags(tokens, tag_list):
-    return [token for token in tokens if token[1] in tag_list]
+def tokenize_text(text) -> List[Token]:
+    return [Token(text, tag) for text, tag in pos_tag(word_tokenize(text), tagset="universal")]
 
 
-def delete_punctuation_from_tokens(tokens):
+def lemmatize_tokens(tokens: List[Token]):
+    return [token.lemmatize() for token in tokens]
+
+
+def convert_tokens_to_lowercase(tokens: List[Token]):
+    return [token.lower() for token in tokens]
+
+
+def filter_stopwords(tokens: List[Token], stopwords: List[str]):
+    return [token for token in tokens if token.text not in stopwords]
+
+
+def keep_only_specified_tags(tokens: List[Token], tag_list: List[str]):
+    return [token for token in tokens if token.tag in tag_list]
+
+
+def delete_punctuation_from_tokens(tokens: List[Token]):
     """Delete punctuation but keep hyphens. Filter out punctuation tokens."""
     punctuation_without_hyphen = re.sub("-", "", string.punctuation)
     return [
-        (token[0].translate(str.maketrans("", "", punctuation_without_hyphen)), token[1])
+        token.translate(str.maketrans("", "", punctuation_without_hyphen))
         for token in tokens
-        if re.sub("^\W*", "", token[0])
+        if re.sub("^\W*", "", token.text)
     ]
 
 
-def delete_single_characters_from_tokens(tokens):
-    return [token for token in tokens if len(token[0]) > 1]
+def delete_single_characters_from_tokens(tokens: List[Token]):
+    return [token for token in tokens if len(token.text) > 1]
 
 
-def split_hyphenated_tokens(tokens):
-    return [(token_p, token[1]) for token in tokens for token_p in token[0].split("-")]
+def split_hyphenated_tokens(tokens: List[Token]) -> List[Token]:
+    return [Token(partial_text, token.tag) for token in tokens for partial_text in token.text.split("-")]
 
 
 def convert_text_to_clean_tokens(
@@ -194,16 +203,14 @@ def create_wordcounts_bar_chart(wordcounts: pd.DataFrame, top=50, color_by="Text
         wordcounts[wordcounts["word"].isin(words_to_include)], x="word", y="count", color=color_by
     )
     fig.update_layout(barmode="stack", xaxis={"categoryorder": "total descending"})
-    #fig.show()
     return fig
 
 
 def create_wordcounts(tokens):
-    df = pd.DataFrame([{"word": token[0], "pos_tag": token[1]} for token in tokens])
+    df = pd.DataFrame([{"word": token.text, "pos_tag": token.tag} for token in tokens])
     df = df.groupby(["word", "pos_tag"], as_index=False).size().rename(columns={"size": "count"})
     df["total_count"] = df.groupby("word")["count"].transform(lambda x: x.sum())
     df["TextType"] = df["word"].map(lambda x: is_latex_math_or_text(x))
-    df["pos_tag"] = df["pos_tag"].map(lambda x: wordnet_to_universal_tags.get(x, "other"))
     return df
 
 
@@ -222,7 +229,6 @@ def create_wordcounts_text(text):
     return df_wordcounts
 
 
-from wordcloud import WordCloud
 
 
 def create_wordcloud(words_cleaned: pd.DataFrame, filename=None):
