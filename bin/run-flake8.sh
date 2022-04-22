@@ -1,2 +1,2 @@
 #!/bin/sh
-poetry run flake8 LaTeXStripper
+poetry run flake8 src/*

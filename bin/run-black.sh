@@ -1,2 +1,2 @@
 #!/bin/sh
-poetry run black LaTeXStripper
+poetry run black src/*
