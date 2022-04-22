@@ -1,2 +1,2 @@
 #!/bin/sh
-poetry run black src/*
+poetry run black src/* *.py

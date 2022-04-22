@@ -1,2 +1,2 @@
 #!/bin/sh
-poetry run flake8 src/*
+poetry run flake8 src/* *.py

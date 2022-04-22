@@ -1,21 +1,20 @@
-from dataclasses import dataclass
-
-from wordcloud import WordCloud
-
-from sklearn.feature_extraction.text import CountVectorizer
-import plotly.express as px
-import pandas as pd
-
-from typing import List
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from nltk import pos_tag
 import re
 import string
+from dataclasses import dataclass
+from typing import List
+
+import pandas as pd
+import plotly.express as px
+from nltk import pos_tag
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+from sklearn.feature_extraction.text import CountVectorizer
+from wordcloud import WordCloud
 
 from latex2wordcloud.LaTeXStripper import strip_text
 
 UNIVERSAL_TAGS_TO_WORDNET = {"NOUN": "n", "VERB": "v", "ADJ": "a", "ADV": "r"}
+
 
 def convert_universal_to_worknet_tag(tag):
     """Map universal POS tags to WordNet POS tags.
@@ -31,8 +30,9 @@ def convert_universal_to_worknet_tag(tag):
     """
     return UNIVERSAL_TAGS_TO_WORDNET.get(tag, "undefined")
 
+
 @dataclass
-class Token():
+class Token:
     text: str
     tag: str
 
@@ -85,7 +85,9 @@ def delete_single_characters_from_tokens(tokens: List[Token]):
 
 
 def split_hyphenated_tokens(tokens: List[Token]) -> List[Token]:
-    return [Token(partial_text, token.tag) for token in tokens for partial_text in token.text.split("-")]
+    return [
+        Token(partial_text, token.tag) for token in tokens for partial_text in token.text.split("-")
+    ]
 
 
 def convert_text_to_clean_tokens(
@@ -96,7 +98,7 @@ def convert_text_to_clean_tokens(
     stopwords=None,
     taglist=None,
     delete_punctuation=False,
-    delete_single_characters=False
+    delete_single_characters=False,
 ):
     """Convert text to list of (cleaned) tokens using NLTK tokenizer
     :param
@@ -215,7 +217,8 @@ def create_wordcounts(tokens):
 
 
 def create_wordcounts_text(text):
-    # CountVectorizer stop_words problematic, see: https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html
+    # CountVectorizer stop_words problematic, see:
+    # https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html
     # cv_raw = CountVectorizer(min_df=0, stop_words='english', max_features=50)
     cv_raw = CountVectorizer(min_df=0, max_features=50)
     counts_raw = cv_raw.fit_transform([text])
@@ -227,8 +230,6 @@ def create_wordcounts_text(text):
     df_wordcounts["is_latex"] = df_wordcounts["word"].map(lambda x: is_latex(x))
     df_wordcounts["TextType"] = df_wordcounts["word"].map(lambda x: is_latex_math_or_text(x))
     return df_wordcounts
-
-
 
 
 def create_wordcloud(words_cleaned: pd.DataFrame, filename=None):
