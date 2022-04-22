@@ -16,6 +16,7 @@ scikit-learn = "^1.0.2"
 pandas = "^1.3.5"
 nltk = "^3.6.7"
 wordcloud = "^1.8.1"
+streamlit = "^1.5.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
@@ -23,6 +24,7 @@ black = "^21.12b0"
 isort = "^5.10.1"
 jupyter = "^1.0.0"
 notebook = "^6.4.6"
+jupyterlab = "^3.3.4"
 
 [build-system]
 requires = ["poetry>=0.12"]
