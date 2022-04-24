@@ -7,9 +7,10 @@ from src.latex2wordcloud.LateX2WordCloud import (
     create_wordcounts_bar_chart,
 )
 
-st.title("Text Analysor")
+st.title("LaTeX2Wordcloud")
+st.markdown("Analyze your text data to find the most common words.")
 
-uploaded_file = st.file_uploader("Upload Files", type=[".tex", ".doc"])
+uploaded_file = st.file_uploader("Upload Files", type=[".tex", ".txt", ".md"])
 if uploaded_file is not None:
     file_details = {
         "FileName": uploaded_file.name,

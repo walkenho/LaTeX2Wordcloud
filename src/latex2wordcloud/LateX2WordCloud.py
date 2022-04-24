@@ -5,13 +5,14 @@ from typing import List
 
 import pandas as pd
 import plotly.express as px
+import nltk
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
 from wordcloud import WordCloud
 
-from latex2wordcloud.LaTeXStripper import strip_text
+from src.latex2wordcloud.LaTeXStripper import strip_text
 
 UNIVERSAL_TAGS_TO_WORDNET = {"NOUN": "n", "VERB": "v", "ADJ": "a", "ADV": "r"}
 
@@ -142,14 +143,12 @@ def convert_text_to_clean_tokens(
 
 def is_latex(string):
     if string in [
-        "end",
         "begin",
         "eq",
         "mathscr",
         "rangle",
         "equation",
         "frac",
-        "equation",
         "left",
         "right",
         "label",
