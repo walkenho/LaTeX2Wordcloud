@@ -1,0 +1,11 @@
+nltk_data/corpora:
+omw-1.4
+stopwords
+wordnet
+
+nltk_data/taggers:
+averaged_perceptron_tagger
+universal_tagset
+
+nltk_data/tokenizers:
+punkt
